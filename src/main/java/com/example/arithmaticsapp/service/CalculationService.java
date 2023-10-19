@@ -1,9 +1,10 @@
 package com.example.arithmaticsapp.service;
 
-import com.example.arithmaticsapp.dto.AddMulOperationDto;
-import com.example.arithmaticsapp.dto.AddOperationDto;
-import com.example.arithmaticsapp.dto.DivideOperationDto;
-import com.example.arithmaticsapp.dto.MultiplyOperationDto;
+import com.example.arithmaticsapp.exceptions.ZeroDivisionException;
+import com.example.arithmaticsapp.operationdto.MulAddDto;
+import com.example.arithmaticsapp.operationdto.AddDto;
+import com.example.arithmaticsapp.operationdto.DivideDto;
+import com.example.arithmaticsapp.operationdto.MultiplyDto;
 import com.example.arithmaticsapp.entity.Operation;
 import com.example.arithmaticsapp.entity.OperationType;
 import com.example.arithmaticsapp.repositories.OperationRepository;
@@ -21,7 +22,7 @@ public class CalculationService {
     private final OperationRepository repository;
 
     @Transactional
-    public Operation addition(AddOperationDto dto) {
+    public Operation addition(AddDto dto) {
         Operation operation = getOperation(OperationType.ADDITION);
         int sum = 0;
         List<Integer> nums = dto.getNums();
@@ -30,19 +31,19 @@ public class CalculationService {
         }
         double result = sum * 1.0;
         operation.setResult(result);
-        return repository.save(operation);
+        repository.save(operation);
+        return operation;
     }
 
-    @Transactional
     private Operation getOperation(OperationType operationType) {
         Operation operation = new Operation();
         operation.setTime(LocalDateTime.now());
         operation.setOperationType(operationType);
-        return repository.save(operation);
+        return operation;
     }
 
     @Transactional
-    public Operation multiplication(MultiplyOperationDto dto) {
+    public Operation multiplication(MultiplyDto dto) {
         Operation operation = getOperation(OperationType.MULTIPLICATION);
         int sum = 1;
         List<Integer> nums = dto.getNums();
@@ -51,21 +52,28 @@ public class CalculationService {
         }
         double result = sum * 1.0;
         operation.setResult(result);
-        return repository.save(operation);
+        repository.save(operation);
+        return operation;
     }
 
     @Transactional
-    public Operation addMultiply(AddMulOperationDto dto) {
+    public Operation multiplyAdd(MulAddDto dto) {
         Operation operation = getOperation(OperationType.MULTIPLY_ADD);
         double result = dto.getNum1() * dto.getNum2() + dto.getNum3() * 1.0;
         operation.setResult(result);
-        return repository.save(operation);
+        repository.save(operation);
+        return operation;
     }
 
-    public Operation division(DivideOperationDto dto) {
+    @Transactional
+    public Operation division(DivideDto dto) {
+        if (dto.getNum2() == 0) {
+            throw new ZeroDivisionException("Zero division");
+        }
         Operation operation = getOperation(OperationType.DIVISION);
         double result = dto.getNum1() * 1.0 / dto.getNum2();
         operation.setResult(result);
-        return repository.save(operation);
+        repository.save(operation);
+        return operation;
     }
 }
